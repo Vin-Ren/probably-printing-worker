@@ -29,6 +29,7 @@ class Worker:
         while True:
             task = self.redis_client.blpop('task_queue', timeout=0)
             try:
+                self.fetch_config()
                 # Blocking pop from a Redis list named 'task_queue'
                 if task:
                     _, task_data = task
