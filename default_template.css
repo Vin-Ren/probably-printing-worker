@@ -1,0 +1,47 @@
+@page {
+    size: A4;
+    margin: 2cm;
+
+    @top-left {
+        content: "%(teamname)s - %(filename)s";
+        color: gray;
+        font-size: 8pt;
+    }
+
+    @top-right {
+        content: "%(datetime)s";
+        color: gray;
+        font-size: 8pt;
+    }
+
+    @bottom-left {
+        content: "%(quote)s — %(quote_author)s";
+        color: gray;
+        font-size: 6pt;
+        font-style: italic;
+    }
+
+    @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        color: gray;
+        font-size: 8pt;
+    }
+}
+
+body {
+    font-family: monospace;
+    font-size: 9pt;
+}
+
+.lineno {
+    color: #888;
+    padding-right: 2em;
+    padding-left: -2em;
+}
+
+pre,
+code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}

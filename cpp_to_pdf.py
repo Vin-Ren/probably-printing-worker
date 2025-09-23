@@ -47,34 +47,12 @@ def cpp_to_pdf(file_path, teamname, output_pdf=None, css_string=None, job_contex
         **{"jobctx_"+k: v for k, v in job_context.items()}
     }
     
+    if not css_string:
+        with open("default_template.css", "r") as f:
+            css_string = f.read()
+    
     # Convert HTML to PDF with headers/footers
     HTML(string=highlighted_html).write_pdf(
         output_pdf,
-        stylesheets=[CSS(
-            string=(
-                css_string % context) if css_string 
-                else f"""
-                @page {{
-                    size: A4;
-                    margin: 2cm;
-                    @top-left {{ content: "%(teamname)s - %(filename)s"; color: gray; font-size: 8pt; }}
-                    @top-right {{ content: "%(datetime)s"; color: gray; font-size: 8pt; }}
-                    @bottom-left {{ content: "%(quote)s — %(quote_author)s"; color: gray; font-size: 6pt; font-style: italic;  }}
-                    @bottom-right {{ content: "Page " counter(page) " of " counter(pages); color: gray; font-size: 8pt; }}
-                }}
-                body {{ 
-                    font-family: monospace;
-                    font-size: 9pt; 
-                }}
-                .lineno {{ 
-                    color: #888; 
-                    padding-right: 2em;
-                    padding-left: -2em;
-                }}
-                pre, code {{
-                    white-space: pre-wrap;
-                    word-wrap: break-word;
-                    overflow-wrap: anywhere;
-                }}
-            """ % context)]
+        stylesheets=[CSS(string=css_string % context)]
     )
