@@ -111,6 +111,7 @@ class Worker:
 
 if __name__ == "__main__":
     import argparse
+    import sys
     load_dotenv()
     
     parser = argparse.ArgumentParser(description="Printing Worker")
@@ -118,8 +119,28 @@ if __name__ == "__main__":
     parser.add_argument('--redis-url', type=str, default=os.getenv("REDIS_URL", "redis://localhost:6379/0"), help='Redis connection URL')
     parser.add_argument('--printers', type=str, default=os.getenv("ENABLED_PRINTERS", ""), help='Comma-separated list of enabled printers')
     parser.add_argument('--sleep-time', type=int, default=int(os.getenv("SLEEP_TIME", 5)), help='Sleep time between tasks when no tasks are available')
+    parser.add_argument('--list-printers', action='store_true', help='List all available printers and exit')
     
     args = parser.parse_args()
+
+    if args.list_printers:
+        conn = cups.Connection()
+        printers = conn.getPrinters()
+        if not printers:
+            print("No printers found.")
+        else:
+            print("Available printers:")
+            for name, details in printers.items():
+                state_map = {
+                    3: "idle",
+                    4: "printing", 
+                    5: "stopped"
+                }
+                state = state_map.get(details.get("printer-state"), "unknown")
+                location = details.get("printer-location", "N/A")
+                make_model = details.get("printer-make-and-model", "N/A")
+                print(f"  - {name}: {state} | Location: {location} | Model: {make_model}")
+        sys.exit(0)
 
     r = redis.from_url(args.redis_url, decode_responses=True, encoding="utf-8")
     worker = Worker(r, enabled_printers=args.printers, sleep_time=args.sleep_time)
