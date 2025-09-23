@@ -25,14 +25,11 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Printing Worker")
     
-    parser.add_argument('--host', type=str, default=os.getenv("REDIS_HOST", "localhost"), help='Redis host')
-    parser.add_argument('--port', type=int, default=os.getenv("REDIS_PORT", 6379), help='Redis port')
-    parser.add_argument('--db', type=int, default=os.getenv("REDIS_DB", 0), help='Redis DB')
-    parser.add_argument('--password', type=str, default=os.getenv("REDIS_PASSWORD", ""), help='Redis password')
+    parser.add_argument('--redis-url', type=str, default=os.getenv("REDIS_URL", "redis://localhost:6379/0"), help='Redis connection URL')
     
     args = parser.parse_args()
 
-    r = redis.Redis(host=args.host, port=args.port, db=args.db, password=args.password, decode_responses=True, encoding="utf-8")
+    r = redis.from_url(args.redis_url, decode_responses=True, encoding="utf-8")
     
     client = Client(r)
     client.run()
