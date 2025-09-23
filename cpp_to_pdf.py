@@ -14,7 +14,7 @@ with open("default_quotes.json", "r") as f:
     default_quotes = json.load(f)
 
 
-def cpp_to_pdf(file_path, teamname, output_pdf=None, css_string=None, quotes=[], job_context={}):
+def cpp_to_pdf(file_path, teamname, output_pdf=None, css_string=None, quotes=[], html_formatter_config="", job_context={}):
     filename = os.path.basename(file_path)
     output_pdf = output_pdf or filename.rsplit(".", 1)[0] + ".pdf"
     dt = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -28,13 +28,21 @@ def cpp_to_pdf(file_path, teamname, output_pdf=None, css_string=None, quotes=[],
     with open(file_path, "r") as f:
         code = f.read()
 
+    default_html_formatter_config = {
+        "full": True,
+        "linenos": "inline",
+        "style": "bw",
+        "cssclass": "codehilite"
+    }
+    # print(default_html_formatter_config, html_formatter_config)
+    # print({**default_html_formatter_config, **json.loads(html_formatter_config or "{}")})
+
+    formatter_config = default_html_formatter_config.copy()
+    if formatter_config:
+        formatter_config.update(json.loads(html_formatter_config or "{}"))
+
     # Syntax highlight with line numbers
-    formatter = HtmlFormatter(
-        full=True,
-        linenos="inline",
-        style="bw",
-        cssclass="codehilite"
-    )
+    formatter = HtmlFormatter(**formatter_config)
     highlighted_html = highlight(code, lexer, formatter)
 
     if quotes:
