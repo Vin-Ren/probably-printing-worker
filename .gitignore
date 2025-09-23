@@ -1,0 +1,27 @@
+env/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+*.pot
+*.mo
+*.db
+instance/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+dist/
+build/
+*.egg-info/
+.venv/
+venv/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
