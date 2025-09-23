@@ -1,5 +1,6 @@
 from datetime import datetime
 import secrets
+import time
 import requests
 import os
 import redis
@@ -11,12 +12,16 @@ from cpp_to_pdf import cpp_to_pdf
 
 
 class Worker:
-    def __init__(self, redis_client: redis.Redis, enabled_printers=""):
+    def __init__(self, redis_client: redis.Redis, enabled_printers="", sleep_time=5):
         self.redis_client = redis_client
         self.conn = cups.Connection()
         self.config = {}
         self.enabled_printers = [e.strip() for e in enabled_printers.split(",")] if enabled_printers else []
         self.job_context = {}
+        self.sleep_time = sleep_time
+
+    def get_idle_printers(self):
+        return [k for k,v in self.conn.getPrinters().items() if v["printer-state"] == 3 and (not self.enabled_printers or k in self.enabled_printers)]
 
     def cout(self, msg):
         if (self.job_context):
@@ -27,6 +32,10 @@ class Worker:
     def run(self):
         self.cout("Worker started, waiting for tasks...")
         while True:
+            if not self.get_idle_printers():
+                self.cout("No idle printers available, waiting...")
+                time.sleep(self.sleep_time)
+                continue
             task = self.redis_client.blpop('task_queue', timeout=0)
             try:
                 self.fetch_config()
@@ -44,6 +53,7 @@ class Worker:
                 if task:
                     _, task_data = task
                     self.redis_client.rpush('task_queue', task_data)
+            time.sleep(self.sleep_time)
 
     def fetch_config(self):
         self.config = self.redis_client.hgetall('config')
@@ -63,11 +73,7 @@ class Worker:
         cpp_to_pdf(filename, teamname, output_pdf, css_string=self.config.get("css_string"), job_context=self.job_context)
     
     def print_from_pdf(self, pdf_path):
-        # Placeholder for printing logic
-        idle_printers = [k for k,v in self.conn.getPrinters().items() if v["printer-state"] == 3 and (not self.enabled_printers or k in self.enabled_printers)]
-        if (not idle_printers):
-            raise RuntimeError("No idle printers available.")
-
+        idle_printers = self.get_idle_printers()
         self.cout(f"Printing PDF: {pdf_path} with printer {idle_printers[0]}")
         job_id = self.conn.printFile(idle_printers[0], pdf_path, self.job_context.get("id", secrets.token_hex(8)), {})
         self.cout(f"Print job submitted to printer {idle_printers[0]} with ID: {job_id}")
@@ -93,8 +99,6 @@ class Worker:
                 self.print_from_pdf(output_pdf)
                 self.cout(f"Task completed")
                 return True
-        except Exception as e:
-            self.cout(f"Error processing task {task}: {e}")
         finally:
             self.job_context = {}
         return False
@@ -110,9 +114,10 @@ if __name__ == "__main__":
     parser.add_argument('--db', type=int, default=os.getenv("REDIS_DB", 0), help='Redis DB')
     parser.add_argument('--password', type=str, default=os.getenv("REDIS_PASSWORD", ""), help='Redis password')
     parser.add_argument('--printers', type=str, default=os.getenv("ENABLED_PRINTERS", ""), help='Comma-separated list of enabled printers')
+    parser.add_argument('--sleep-time', type=int, default=int(os.getenv("SLEEP_TIME", 5)), help='Sleep time between tasks when no tasks are available')
     
     args = parser.parse_args()
 
     r = redis.Redis(host=args.host, port=args.port, db=args.db, password=args.password, decode_responses=True, encoding="utf-8")
-    worker = Worker(r)
+    worker = Worker(r, enabled_printers=args.printers, sleep_time=args.sleep_time)
     worker.run()
