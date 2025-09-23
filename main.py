@@ -70,7 +70,7 @@ class Worker:
             return False
 
     def convert_to_pdf(self, filename, teamname, output_pdf=None):
-        cpp_to_pdf(filename, teamname, output_pdf, css_string=self.config.get("css_string"), job_context=self.job_context)
+        cpp_to_pdf(filename, teamname, output_pdf, css_string=self.config.get("css_string"), quotes=self.config.get("quotes"), job_context=self.job_context)
     
     def print_from_pdf(self, pdf_path):
         idle_printers = self.get_idle_printers()

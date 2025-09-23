@@ -9,12 +9,12 @@ import random
 
 import json
 
-quotes = []
-with open("quotes.json", "r") as f:
-    quotes = json.load(f)
+default_quotes = []
+with open("default_quotes.json", "r") as f:
+    default_quotes = json.load(f)
 
 
-def cpp_to_pdf(file_path, teamname, output_pdf=None, css_string=None, job_context={}):
+def cpp_to_pdf(file_path, teamname, output_pdf=None, css_string=None, quotes=[], job_context={}):
     filename = os.path.basename(file_path)
     output_pdf = output_pdf or filename.rsplit(".", 1)[0] + ".pdf"
     dt = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -37,6 +37,10 @@ def cpp_to_pdf(file_path, teamname, output_pdf=None, css_string=None, job_contex
     )
     highlighted_html = highlight(code, lexer, formatter)
 
+    if quotes:
+        quotes = json.loads(quotes)
+    else:
+        quotes = default_quotes
     quote = random.choice(quotes) if quotes else {"quote": "", "author": ""}
     context = {
         "teamname": teamname, 
