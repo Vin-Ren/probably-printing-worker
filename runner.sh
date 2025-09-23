@@ -1,8 +1,7 @@
 #!/bin/bash
 # Install dependencies and run the main script
 sudo apt-get update -y
-sudo apt-get install -y libcups2-dev libcairo2 pango1.0-tools libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info fonts-dejavu
-sudo apt-get install -y cups cups-pdf
+sudo apt-get install -y libcups2-dev libcairo2 pango1.0-tools libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info fonts-dejavu cups cups-pdf python3-dev libcups2-dev build-essential
 
 # Check whether is in a virtual environment
 if [ -z "$VIRTUAL_ENV" ]; then
@@ -27,12 +26,12 @@ if [ -z "$VIRTUAL_ENV" ]; then
         pip install -r requirements.txt
         echo "Running the main script..."
         echo "------------------------"
-        python main.py
+        python main.py "$@"
     else
         echo "Exiting. Please activate a virtual environment and try again."
     exit 1
     fi
 else
-    python main.py
+    python main.py "$@"
 fi
 

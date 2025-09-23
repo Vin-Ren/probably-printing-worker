@@ -1,12 +1,20 @@
 # Probably printing worker
 This worker is created with association to [kevincornellius/probably-printing](https://github.com/kevincornellius/probably-printing).
 
-### Install dependencies:
+### Easier Usage
+Simply run:
+```sh
+./runner.sh
+```
+This will prompt you to create a virtual environment if you didn't have one yet. After which, the app is started. You can even pass arguments to this script, which will then be forwarded to the main.py app.
+
+### Install dependencies
 ```sh
 sudo apt-get update
 sudo apt-get install libcups2-dev libcairo2 pango1.0-tools libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info fonts-dejavu
 sudo apt-get install cups cups-pdf
 ```
+By default this will install the pdf driver for cups, i.e. printing to a file. This is useful for testing purposes, and if you are a developer, you can change the output path of this printer with `sudo nano /etc/cups/cups-pdf.conf`.
 
 # Installing python dependencies
 ```sh
