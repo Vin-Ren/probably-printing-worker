@@ -32,6 +32,9 @@ class Worker:
     def run(self):
         self.cout("Worker started, waiting for tasks...")
         while True:
+            if self.redis_client.llen('task_queue')==0:
+                time.sleep(self.sleep_time)
+                continue
             if not self.get_idle_printers():
                 self.cout("No idle printers available, waiting...")
                 time.sleep(self.sleep_time)
