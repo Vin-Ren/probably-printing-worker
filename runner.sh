@@ -13,7 +13,9 @@ if [ -z "$VIRTUAL_ENV" ]; then
             echo "Virtual environment found in $dir. Activating..."
             source "$dir/bin/activate"
             pip install -r requirements.txt
-            python main.py
+            echo "Running the main script..."
+            echo "------------------------"
+            python main.py "$@"
             exit 0
         fi
     done
