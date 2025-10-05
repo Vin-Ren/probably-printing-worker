@@ -4,7 +4,7 @@ This worker is created with association to [kevincornellius/probably-printing](h
 This worker uses CUPS to print files, as such, it only supports unix based system (Though you might be able to use WSL for this in some cases).
 
 ### Easier Usage
-Simply run:
+Copy .env.example to .env and populate it as required. Then simply run:
 ```sh
 ./runner.sh
 ```
